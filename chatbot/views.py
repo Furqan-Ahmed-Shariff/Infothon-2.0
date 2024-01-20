@@ -20,9 +20,9 @@ api_key = os.getenv("AbstractApi")
 
 api_url = "https://ipgeolocation.abstractapi.com/v1/?api_key=" + api_key
 
-places_key = os.getenv('places_key')
-places_host = os.getenv('places_host')
-places_url = "https://local-business-data.p.rapidapi.com/search-nearby"
+places_key = os.getenv("places_key")
+places_host = os.getenv("places_host")
+places_url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJrTLr-GyuEmsRBfy61i59si0&fields=address_components&key=AIzaSyCtGXVu49dbt39PczKrIzJbAwdVzG5oGPs "
 places_headers = {
     "X-RapidAPI-Key": places_key,
     "X-RapidAPI-Host": places_host,
@@ -77,7 +77,7 @@ def get_ip(request):
     country = json.loads(country)
     long = country["longitude"]
     lat = country["latitude"]
-    return (lat, long, country['country_code'])
+    return (lat, long, country["country_code"])
 
 
 def loc_services(request):
@@ -86,15 +86,15 @@ def loc_services(request):
         language = "Select Language"
     else:
         language = request.session.get("language")
-    if request.method == 'POST':
+    if request.method == "POST":
         (lat, long, code) = get_ip(request)
-        query = json.loads(request.body).get('query')
+        query = json.loads(request.body).get("query")
         querystring = {
             "query": query,
             "lat": lat,
             "lng": long,
             "limit": "20",
-            "language": language_codes[request.session['language']],
+            "language": language_codes[request.session["language"]],
             "region": code,
         }
         response = requests.get(
