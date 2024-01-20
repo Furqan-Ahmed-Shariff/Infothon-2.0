@@ -70,10 +70,29 @@
         flex-direction: row-reverse;
     }
 </style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 {% endblock %}
 
 
 {% block content %}
+<button id="modaltrigger" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+    hidden></button>
+<div class="modal fade" id="exampleModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body">
+                <ul class="dropdown-menu" style="display: contents;cursor: pointer;">
+                    <li><a class="dropdown-item" onclick="get_data(this.innerHTML)"
+                            data-bs-dismiss="modal">Restauraunts</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="chat-container">
     <div class="card flex-grow-1">
         <div class="card-header bg-primary text-white">Chat</div>
@@ -100,165 +119,120 @@
                 </div>
             </div>
         </div>
-        <div class="card-body messages-box">
-
-            <ul class="list-unstyled messages-list">
-
-                <!-- <li class="message received">
-          <div class="message-text">
-            <div class="message-sender">
-              <b>ChatFIS</b>
-            </div>
-            <div class="message-content">
-              Hi {{user.username}}, I am your AI Chatbot, you can ask me anything.
-            </div>
-          </div>
-        </li> -->
-
-
-                {% for chat in chats %}
-                {% if chat.user == request.user %}
-
-
-                <li class="message sent">
-                    <div class="message-text">
-                        <div class="message-sender">
-                            <b>You</b>
-                        </div>
-                        <div class="message-content">
-                            {{chat.message}}
-                        </div>
-                    </div>
-                </li>
-
-                <li class="message received">
-                    <div class="message-text">
-                        <div class="message-sender">
-                            <b>ChatFIS</b>
-                        </div>
-                        <div class="message-content">
-                            {{chat.response}}
-                        </div>
-                    </div>
-                </li>
-
-                {% endif %}
-                {% endfor %}
-
-            </ul>
-
-        </div>
-        <br><br>
-        <br><br>
-        <br><br>
     </div>
-    <form class="message-form">
-        {%csrf_token%}
-        <div class="input-group">
-            <input type="text" class="form-control message-input" placeholder="Type your message...">
-            <div class="input-group-append">
-                <button type="submit" class="btn btn-primary btn-send">Send</button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<script>
-    const messagesList = document.querySelector('.messages-list');
-    const messageForm = document.querySelector('.message-form');
-    const messageInput = document.querySelector('.message-input');
-
-    messageForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const message = messageInput.value.trim();
-        if (message.length === 0) {
-            return;
+    <div class="accordion" id="accordion"></div>
+    <script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
+            ({ key: "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg", v: "weekly" });</script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
-        const messageItem = document.createElement('li');
-        messageItem.classList.add('message', 'sent');
-        messageItem.innerHTML = `
-      <div class="message-text">
-        <div class="message-sender">
-          <b>You</b>
-        </div>
-        <div class="message-content">
-          ${message}
-        </div>
-      </div>`;
-        messagesList.appendChild(messageItem);
+        async function lang_sel(obj) {
+            let language = obj.innerHTML
+            let csrftoken = getCookie('csrftoken');
 
-        messageInput.value = '';
+            response = await fetch("{% url 'lang_change' %}", {
+                method: "POST",
+                body: JSON.stringify({ language }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8",
+                    "X-CSRFToken": csrftoken
+                }
+            }
+            )
+            data = await response.json()
+            document.querySelector("#language").innerHTML = data.changed_language
+        }
 
-        const messageItem2 = document.createElement('li');
-        messageItem2.classList.add('message', 'received');
-        messageItem2.innerHTML = `
-      <div class="message-text">
-        <div class="message-sender">
-          <b>AI Chatbot</b>
-        </div>
-        <div class="message-content">
-          <img src="{% static 'loading.gif' %}" width="50"/>
-        </div>
-      </div>`;
-        messagesList.appendChild(messageItem2);
+        async function get_data(query) {
+            let csrftoken = getCookie('csrftoken');
+            response = await fetch("{% url 'loc_services' %}", {
+                method: "POST",
+                body: JSON.stringify({ query }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8",
+                    "X-CSRFToken": csrftoken
+                }
+            }
+            )
+            data = await response.json()
 
-        messageInput.value = '';
-        let textDecoder = new TextDecoder('utf-8')
+            for (let i = 0; i < data.data.length; i++) {
+                const place = data.data[i];
+                accordion = document.querySelector("#accordion")
 
-        fetch('', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                'csrfmiddlewaretoken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'message': message
-            })
+                let acc_item = document.createElement('div')
+                acc_item.classList.add('accordion-item')
+
+                let header = document.createElement('h2')
+                header.classList.add("accordion-header")
+
+                let button = document.createElement('button')
+                button.classList.add('accordion-button', 'collapsed')
+                button.setAttribute('type', 'button')
+                button.setAttribute('data-bs-toggle', 'collapse')
+                button.setAttribute('data-bs-target', '#collapse' + i.toString())
+                button.setAttribute('aria-expanded', 'false')
+                button.setAttribute('aria-controls', 'collapse' + i.toString())
+                button.innerHTML = place.name
+
+                let collapse = document.createElement('div')
+                collapse.classList.add('accordion-collapse', 'collapse')
+                collapse.setAttribute('id', 'collapse' + i.toString())
+                collapse.setAttribute('data-bs-parent', '#accordion')
+
+                let body = document.createElement('div')
+                body.classList.add('accordion-body')
+                let map_holder = document.createElement('div')
+                body.appendChild(map_holder)
+
+                button.addEventListener('click', (async () => {
+                    const name = place.name
+                    const lat = place.latitude
+                    const lng = place.longitude
+                    const address = place.address
+                    body.innerHTML += '<h4>Address</h4><p>' + address + '</p>'
+                    const position = { lat, lng };
+                    const { Map } = await google.maps.importLibrary("maps");
+                    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+                    let map = new Map(map_holder, {
+                        zoom: 4,
+                        center: position,
+                        mapId: "DEMO_MAP_ID",
+                    });
+                    const marker = new AdvancedMarkerElement({
+                        map: map,
+                        position: position,
+                        title: name,
+                    });
+                }))
+
+                header.appendChild(button)
+                collapse.appendChild(body)
+                acc_item.appendChild(header)
+                acc_item.appendChild(collapse)
+                accordion.appendChild(acc_item)
+
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            titles = { 'English': 'What are you looking for?' }
+            document.querySelector('#modalTitle').innerHTML = titles['{{ selected_lang }}']
+            document.querySelector('#modaltrigger').click()
         })
-            .then(async (response) => {
-                reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
-                while (true) {
-                    let { value, done } = await reader.read()
-                    if (done) break
-                    value = value.substr(16, value.length - 35)
-                    ele = messageItem2.querySelector('.message-text').querySelector('.message-content')
-                    ele.innerHTML = value
-                }
-            });
-    });
-
-</script>
-<script>
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    async function lang_sel(obj) {
-        let language = obj.innerHTML
-        let csrftoken = getCookie('csrftoken');
-
-        response = await fetch("{% url 'lang_change' %}", {
-            method: "POST",
-            body: JSON.stringify({ language }),
-            headers: {
-                "Content-type": "application/json; charset=UTF-8",
-                "X-CSRFToken": csrftoken
-            }
-        }
-        )
-        data = await response.json()
-        document.querySelector("#language").innerHTML = data.changed_language
-    }
-</script>
-{% endblock %}
+    </script>
+    {% endblock %}
