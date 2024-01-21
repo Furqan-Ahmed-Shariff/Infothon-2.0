@@ -22,7 +22,7 @@ api_url = "https://ipgeolocation.abstractapi.com/v1/?api_key=" + api_key
 
 places_key = os.getenv("places_key")
 places_host = os.getenv("places_host")
-places_url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJrTLr-GyuEmsRBfy61i59si0&fields=address_components&key=AIzaSyCtGXVu49dbt39PczKrIzJbAwdVzG5oGPs "
+places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&key=AIzaSyCtGXVu49dbt39PczKrIzJbAwdVzG5oGPs "
 places_headers = {
     "X-RapidAPI-Key": places_key,
     "X-RapidAPI-Host": places_host,
@@ -77,7 +77,7 @@ def get_ip(request):
     country = json.loads(country)
     long = country["longitude"]
     lat = country["latitude"]
-    return (lat, long, country["country_code"])
+    return (lat, long)
 
 
 def loc_services(request):
@@ -87,19 +87,14 @@ def loc_services(request):
     else:
         language = request.session.get("language")
     if request.method == "POST":
-        (lat, long, code) = get_ip(request)
+        (lat, long) = get_ip(request)
         query = json.loads(request.body).get("query")
-        querystring = {
-            "query": query,
-            "lat": lat,
-            "lng": long,
-            "limit": "20",
-            "language": language_codes[request.session["language"]],
-            "region": code,
-        }
-        response = requests.get(
-            places_url, headers=places_headers, params=querystring
-        ).json()
+        global places_url
+        url = places_url
+        url += '&location=' + str(lat) + '%2C' + str(long)
+        url += '&radius=1500'
+        url += '&type=' + query
+        response = requests.get(url).json()
         return JsonResponse(response)
     return render(
         request,
