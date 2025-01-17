@@ -16,19 +16,19 @@ import requests
 import os
 
 api_key = os.getenv("AbstractApi")
-
+translate_api_key = os.getenv("AzureKey")
+GOOGLE_API_KEY = os.getenv("GoogleKey")
 
 api_url = "https://ipgeolocation.abstractapi.com/v1/?api_key=" + api_key
 
 places_key = os.getenv("places_key")
 places_host = os.getenv("places_host")
-places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&key=AIzaSyCtGXVu49dbt39PczKrIzJbAwdVzG5oGPs "
+places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?&key=" + GOOGLE_API_KEY
 places_headers = {
     "X-RapidAPI-Key": places_key,
     "X-RapidAPI-Host": places_host,
 }
 
-GOOGLE_API_KEY = "AIzaSyCAks_8sofyC_iw0x15LldN1oH05CuY7Xg"
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-pro")
 language_codes = {
@@ -106,7 +106,7 @@ def loc_services(request):
 def translate(message, fr, to):
     import requests, uuid, json
 
-    key = "ac3721230fce45cab64c882c961f7a08"
+    key = translate_api_key
     endpoint = "https://api.cognitive.microsofttranslator.com"
 
     location = "centralindia"
